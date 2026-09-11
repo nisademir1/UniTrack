@@ -3,174 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UniTrack - Akademik Takip Sistemi</title>
+    <title>UniTrack - Akademik Takip Portalı</title>
     <style>
         :root {
-            --bg: #0f172a;
-            --card-bg: #1e293b;
+            --bg: #0b0f19;
+            --card-bg: #151d30;
             --accent: #3b82f6;
             --accent-hover: #2563eb;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --border: #334155;
+            --border: #263352;
             --success: #10b981;
+            --warning: #f59e0b;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background-color: var(--bg); color: var(--text-main); padding: 2.5rem 1rem; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 1050px; display: flex; flex-direction: column; gap: 1.5rem; }
+        
+        header { border-bottom: 1px solid var(--border); padding-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
+        h1 { font-size: 1.8rem; font-weight: 700; color: #60a5fa; }
 
-        body {
-            background-color: var(--bg);
-            color: var(--text-main);
-            padding: 2rem 1rem;
-            display: flex;
-            justify-content: center;
-        }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+        .stat-card { background-color: var(--card-bg); padding: 1.25rem; border-radius: 12px; border: 1px solid var(--border); }
+        .stat-title { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+        .stat-value { font-size: 2rem; font-weight: 700; margin-top: 0.5rem; color: var(--success); }
 
-        .container {
-            width: 100%;
-            max-width: 1000px;
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
+        .card { background-color: var(--card-bg); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border); }
+        h2 { font-size: 1.2rem; margin-bottom: 1rem; color: #cbd5e1; }
 
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 1rem;
-        }
+        form { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem; align-items: end; }
+        .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+        label { font-size: 0.8rem; color: var(--text-muted); }
+        input { background: #0b0f19; border: 1px solid var(--border); color: var(--text-main); padding: 0.65rem; border-radius: 8px; outline: none; }
+        input:focus { border-color: var(--accent); }
 
-        h1 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #60a5fa;
-        }
+        button.btn-primary { background: var(--accent); color: white; border: none; padding: 0.65rem 1rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        button.btn-primary:hover { background: var(--accent-hover); }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-        }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { text-align: left; padding: 0.85rem 1rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+        th { color: var(--text-muted); font-weight: 600; }
+        tbody tr:hover { background-color: rgba(255, 255, 255, 0.02); }
 
-        .stat-card {
-            background-color: var(--card-bg);
-            padding: 1.25rem;
-            border-radius: 10px;
-            border: 1px solid var(--border);
-        }
+        .badge { display: inline-block; padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.8rem; font-weight: 700; }
+        .badge-code { background: rgba(59, 130, 246, 0.15); color: #93c5fd; }
+        .badge-letter { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+        .badge-fail { background: rgba(239, 68, 68, 0.15); color: #f87171; }
 
-        .stat-title {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .stat-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-top: 0.5rem;
-            color: var(--success);
-        }
-
-        .card {
-            background-color: var(--card-bg);
-            padding: 1.5rem;
-            border-radius: 10px;
-            border: 1px solid var(--border);
-        }
-
-        h2 {
-            font-size: 1.2rem;
-            margin-bottom: 1rem;
-            color: #cbd5e1;
-        }
-
-        form {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 0.75rem;
-            align-items: end;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.35rem;
-        }
-
-        label {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-
-        input {
-            background: #0f172a;
-            border: 1px solid var(--border);
-            color: var(--text-main);
-            padding: 0.6rem 0.75rem;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            outline: none;
-        }
-
-        input:focus {
-            border-color: var(--accent);
-        }
-
-        button {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 0.65rem 1rem;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        button:hover {
-            background: var(--accent-hover);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-        }
-
-        th, td {
-            text-align: left;
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.9rem;
-        }
-
-        th {
-            color: var(--text-muted);
-            font-weight: 600;
-        }
-
-        tbody tr:hover {
-            background-color: rgba(255, 255, 255, 0.02);
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            background: rgba(59, 130, 246, 0.2);
-            color: #93c5fd;
-        }
+        .btn-delete { background: transparent; border: 1px solid var(--border); color: #f87171; padding: 0.35rem 0.65rem; border-radius: 6px; cursor: pointer; transition: 0.2s; font-size: 0.8rem; }
+        .btn-delete:hover { background: var(--danger); color: white; border-color: var(--danger); }
     </style>
 </head>
 <body>
@@ -182,33 +66,33 @@
             </div>
         </header>
 
-        <!-- İstatistikler -->
+        <!-- Göstergeler -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-title">Toplam Ders</div>
-                <div class="stat-value" id="totalCourses">0</div>
+                <div class="stat-title">Dönem GANO (4.00)</div>
+                <div class="stat-value" id="gpaValue">0.00</div>
             </div>
             <div class="stat-card">
                 <div class="stat-title">Toplam AKTS</div>
-                <div class="stat-value" id="totalEcts">0</div>
+                <div class="stat-value" id="totalEcts" style="color: #60a5fa;">0</div>
             </div>
             <div class="stat-card">
-                <div class="stat-title">Dönem Ortalama Notu</div>
-                <div class="stat-value" id="avgGrade">0.00</div>
+                <div class="stat-title">Kayıtlı Ders Sayısı</div>
+                <div class="stat-value" id="totalCourses" style="color: #cbd5e1;">0</div>
             </div>
         </div>
 
         <!-- Ders Ekleme Formu -->
         <div class="card">
-            <h2>Yeni Ders Ekle</h2>
+            <h2>Yeni Ders Kaydı</h2>
             <form id="courseForm">
                 <div class="form-group">
                     <label>Ders Kodu</label>
-                    <input type="text" id="code" placeholder="BSM308" required>
+                    <input type="text" id="code" placeholder="BSM311" required>
                 </div>
                 <div class="form-group">
                     <label>Ders Adı</label>
-                    <input type="text" id="name" placeholder="Web Programlama" required>
+                    <input type="text" id="name" placeholder="İşaretler ve Sistemler" required>
                 </div>
                 <div class="form-group">
                     <label>Kredi</label>
@@ -216,7 +100,7 @@
                 </div>
                 <div class="form-group">
                     <label>AKTS</label>
-                    <input type="number" id="ects" value="4" min="1" required>
+                    <input type="number" id="ects" value="3" min="1" required>
                 </div>
                 <div class="form-group">
                     <label>Vize Notu</label>
@@ -226,28 +110,27 @@
                     <label>Final Notu</label>
                     <input type="number" id="final" value="0" min="0" max="100" step="0.5">
                 </div>
-                <button type="submit">Ekle</button>
+                <button type="submit" class="btn-primary">Dersi Ekle</button>
             </form>
         </div>
 
         <!-- Ders Listesi -->
         <div class="card">
-            <h2>Kayıtlı Derslerim</h2>
+            <h2>Derslerim ve Not Durumu</h2>
             <table>
                 <thead>
                     <tr>
                         <th>Kod</th>
                         <th>Ders Adı</th>
-                        <th>Kredi</th>
                         <th>AKTS</th>
                         <th>Vize</th>
                         <th>Final</th>
-                        <th>Ortalama</th>
+                        <th>Ort.</th>
+                        <th>Harf Notu</th>
+                        <th>İşlem</th>
                     </tr>
                 </thead>
-                <tbody id="courseTableBody">
-                    <!-- JavaScript ile doldurulacak -->
-                </tbody>
+                <tbody id="courseTableBody"></tbody>
             </table>
         </div>
     </div>
@@ -255,7 +138,6 @@
     <script>
         const API_BASE = '/api/courses';
 
-        // Dersleri Backend'den Çek
         async function fetchCourses() {
             try {
                 const res = await fetch(API_BASE);
@@ -263,53 +145,68 @@
                 renderTable(data);
                 updateStats(data);
             } catch (err) {
-                console.error("Dersler yüklenirken hata:", err);
+                console.error("Veriler alınamadı:", err);
             }
         }
 
-        // Tabloyu Güncelle
         function renderTable(courses) {
             const tbody = document.getElementById('courseTableBody');
             tbody.innerHTML = '';
 
             courses.forEach(c => {
                 const tr = document.createElement('tr');
+                const isFailed = c.letter === 'FF' || c.letter === 'FD';
+                const badgeClass = isFailed ? 'badge-fail' : 'badge-letter';
+
                 tr.innerHTML = `
-                    <td><span class="badge">${c.code}</span></td>
+                    <td><span class="badge badge-code">${c.code}</span></td>
                     <td><strong>${c.name}</strong></td>
-                    <td>${c.credit}</td>
                     <td>${c.ects}</td>
                     <td>${c.midterm}</td>
                     <td>${c.final}</td>
-                    <td><strong>${c.average}</strong></td>
+                    <td>${c.average}</td>
+                    <td><span class="badge ${badgeClass}">${c.letter} (${c.grade_point})</span></td>
+                    <td>
+                        <button class="btn-delete" onclick="deleteCourse(${c.id})">Sil</button>
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        // Dashboard Metriklerini Hesapla
         function updateStats(courses) {
             const total = courses.length;
             const totalEcts = courses.reduce((sum, c) => sum + c.ects, 0);
-            
-            let totalWeighted = 0;
+
+            // AKTS ağırlıklı GANO hesaplama: Toplam (Katsayı * AKTS) / Toplam AKTS
+            let totalWeightedPoints = 0;
             courses.forEach(c => {
-                totalWeighted += c.average * c.ects;
+                totalWeightedPoints += c.grade_point * c.ects;
             });
-            const avg = totalEcts > 0 ? (totalWeighted / totalEcts).toFixed(2) : '0.00';
+
+            const gano = totalEcts > 0 ? (totalWeightedPoints / totalEcts).toFixed(2) : '0.00';
 
             document.getElementById('totalCourses').textContent = total;
             document.getElementById('totalEcts').textContent = totalEcts;
-            document.getElementById('avgGrade').textContent = avg;
+            document.getElementById('gpaValue').textContent = gano;
         }
 
-        // Yeni Ders Ekleme Formu
+        async function deleteCourse(id) {
+            if (!confirm("Bu dersi silmek istediğine emin misin?")) return;
+
+            const res = await fetch(`${API_BASE}/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                fetchCourses();
+            } else {
+                alert("Silme işlemi başarısız oldu.");
+            }
+        }
+
         document.getElementById('courseForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-
             const payload = {
-                code: document.getElementById('code').value.trim(),
-                name: document.getElementById('name').value.trim(),
+                code: document.getElementById('code').value,
+                name: document.getElementById('name').value,
                 credit: parseInt(document.getElementById('credit').value),
                 ects: parseInt(document.getElementById('ects').value),
                 midterm: parseFloat(document.getElementById('midterm').value) || 0.0,
@@ -326,11 +223,10 @@
                 document.getElementById('courseForm').reset();
                 fetchCourses();
             } else {
-                alert("Ders eklenemedi. Kodun benzersiz olduğundan emin ol!");
+                alert("Ders eklenirken bir hata oluştu (Aynı ders kodu zaten kayıtlı olabilir).");
             }
         });
 
-        // Sayfa açıldığında dersleri yükle
         fetchCourses();
     </script>
 </body>
