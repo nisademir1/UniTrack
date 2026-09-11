@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UniTrack - Akademik Takip Portalı</title>
+    <!-- Chart.js Kütüphanesi -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --bg: #0b0f19;
@@ -11,17 +13,15 @@
             --accent: #3b82f6;
             --accent-hover: #2563eb;
             --danger: #ef4444;
-            --danger-hover: #dc2626;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --border: #263352;
             --success: #10b981;
-            --warning: #f59e0b;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
         body { background-color: var(--bg); color: var(--text-main); padding: 2.5rem 1rem; display: flex; justify-content: center; }
-        .container { width: 100%; max-width: 1050px; display: flex; flex-direction: column; gap: 1.5rem; }
+        .container { width: 100%; max-width: 1100px; display: flex; flex-direction: column; gap: 1.5rem; }
         
         header { border-bottom: 1px solid var(--border); padding-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
         h1 { font-size: 1.8rem; font-weight: 700; color: #60a5fa; }
@@ -30,6 +30,9 @@
         .stat-card { background-color: var(--card-bg); padding: 1.25rem; border-radius: 12px; border: 1px solid var(--border); }
         .stat-title { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
         .stat-value { font-size: 2rem; font-weight: 700; margin-top: 0.5rem; color: var(--success); }
+
+        .charts-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; }
+        @media (max-width: 850px) { .charts-grid { grid-template-columns: 1fr; } }
 
         .card { background-color: var(--card-bg); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border); }
         h2 { font-size: 1.2rem; margin-bottom: 1rem; color: #cbd5e1; }
@@ -79,6 +82,22 @@
             <div class="stat-card">
                 <div class="stat-title">Kayıtlı Ders Sayısı</div>
                 <div class="stat-value" id="totalCourses" style="color: #cbd5e1;">0</div>
+            </div>
+        </div>
+
+        <!-- Grafikler Bölümü -->
+        <div class="charts-grid">
+            <div class="card">
+                <h2>Ders Bazlı Not Karşılaştırması</h2>
+                <div style="position: relative; height: 260px;">
+                    <canvas id="gradesChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <h2>Harf Notu Dağılımı</h2>
+                <div style="position: relative; height: 260px; display: flex; justify-content: center;">
+                    <canvas id="letterChart"></canvas>
+                </div>
             </div>
         </div>
 
@@ -137,6 +156,8 @@
 
     <script>
         const API_BASE = '/api/courses';
+        let barChartInstance = null;
+        let doughnutChartInstance = null;
 
         async function fetchCourses() {
             try {
@@ -144,6 +165,7 @@
                 const data = await res.json();
                 renderTable(data);
                 updateStats(data);
+                renderCharts(data);
             } catch (err) {
                 console.error("Veriler alınamadı:", err);
             }
@@ -178,7 +200,6 @@
             const total = courses.length;
             const totalEcts = courses.reduce((sum, c) => sum + c.ects, 0);
 
-            // AKTS ağırlıklı GANO hesaplama: Toplam (Katsayı * AKTS) / Toplam AKTS
             let totalWeightedPoints = 0;
             courses.forEach(c => {
                 totalWeightedPoints += c.grade_point * c.ects;
@@ -189,6 +210,67 @@
             document.getElementById('totalCourses').textContent = total;
             document.getElementById('totalEcts').textContent = totalEcts;
             document.getElementById('gpaValue').textContent = gano;
+        }
+
+        function renderCharts(courses) {
+            const labels = courses.map(c => c.code);
+            const midterms = courses.map(c => c.midterm);
+            const finals = courses.map(c => c.final);
+            const averages = courses.map(c => c.average);
+
+            // 1. Çubuk Grafik (Vize - Final - Ortalama)
+            const ctxBar = document.getElementById('gradesChart').getContext('2d');
+            if (barChartInstance) barChartInstance.destroy();
+
+            barChartInstance = new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'Vize', data: midterms, backgroundColor: '#3b82f6' },
+                        { label: 'Final', data: finals, backgroundColor: '#8b5cf6' },
+                        { label: 'Ortalama', data: averages, backgroundColor: '#10b981' }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, max: 100, grid: { color: '#263352' }, ticks: { color: '#94a3b8' } },
+                        x: { grid: { color: '#263352' }, ticks: { color: '#94a3b8' } }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#f8fafc' } }
+                    }
+                }
+            });
+
+            // 2. Pasta / Halka Grafik (Harf Notu Dağılımı)
+            const letterCounts = {};
+            courses.forEach(c => {
+                letterCounts[c.letter] = (letterCounts[c.letter] || 0) + 1;
+            });
+
+            const ctxDoughnut = document.getElementById('letterChart').getContext('2d');
+            if (doughnutChartInstance) doughnutChartInstance.destroy();
+
+            doughnutChartInstance = new Chart(ctxDoughnut, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(letterCounts),
+                    datasets: [{
+                        data: Object.values(letterCounts),
+                        backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899', '#ef4444']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#f8fafc' } }
+                    }
+                }
+            });
         }
 
         async function deleteCourse(id) {
