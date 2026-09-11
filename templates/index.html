@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniTrack - Akademik Takip Sistemi</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --success: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            padding: 2rem 1rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #60a5fa;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background-color: var(--card-bg);
+            padding: 1.25rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .stat-title {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-top: 0.5rem;
+            color: var(--success);
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: #cbd5e1;
+        }
+
+        form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.75rem;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        input {
+            background: #0f172a;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 0.6rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--accent);
+        }
+
+        button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.65rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: var(--accent-hover);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        th {
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(59, 130, 246, 0.2);
+            color: #93c5fd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>UniTrack</h1>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Öğrenci Akademik Takip Portalı</p>
+            </div>
+        </header>
+
+        <!-- İstatistikler -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-title">Toplam Ders</div>
+                <div class="stat-value" id="totalCourses">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Toplam AKTS</div>
+                <div class="stat-value" id="totalEcts">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Dönem Ortalama Notu</div>
+                <div class="stat-value" id="avgGrade">0.00</div>
+            </div>
+        </div>
+
+        <!-- Ders Ekleme Formu -->
+        <div class="card">
+            <h2>Yeni Ders Ekle</h2>
+            <form id="courseForm">
+                <div class="form-group">
+                    <label>Ders Kodu</label>
+                    <input type="text" id="code" placeholder="BSM308" required>
+                </div>
+                <div class="form-group">
+                    <label>Ders Adı</label>
+                    <input type="text" id="name" placeholder="Web Programlama" required>
+                </div>
+                <div class="form-group">
+                    <label>Kredi</label>
+                    <input type="number" id="credit" value="3" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label>AKTS</label>
+                    <input type="number" id="ects" value="4" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label>Vize Notu</label>
+                    <input type="number" id="midterm" value="0" min="0" max="100" step="0.5">
+                </div>
+                <div class="form-group">
+                    <label>Final Notu</label>
+                    <input type="number" id="final" value="0" min="0" max="100" step="0.5">
+                </div>
+                <button type="submit">Ekle</button>
+            </form>
+        </div>
+
+        <!-- Ders Listesi -->
+        <div class="card">
+            <h2>Kayıtlı Derslerim</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Kod</th>
+                        <th>Ders Adı</th>
+                        <th>Kredi</th>
+                        <th>AKTS</th>
+                        <th>Vize</th>
+                        <th>Final</th>
+                        <th>Ortalama</th>
+                    </tr>
+                </thead>
+                <tbody id="courseTableBody">
+                    <!-- JavaScript ile doldurulacak -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api/courses';
+
+        // Dersleri Backend'den Çek
+        async function fetchCourses() {
+            try {
+                const res = await fetch(API_BASE);
+                const data = await res.json();
+                renderTable(data);
+                updateStats(data);
+            } catch (err) {
+                console.error("Dersler yüklenirken hata:", err);
+            }
+        }
+
+        // Tabloyu Güncelle
+        function renderTable(courses) {
+            const tbody = document.getElementById('courseTableBody');
+            tbody.innerHTML = '';
+
+            courses.forEach(c => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><span class="badge">${c.code}</span></td>
+                    <td><strong>${c.name}</strong></td>
+                    <td>${c.credit}</td>
+                    <td>${c.ects}</td>
+                    <td>${c.midterm}</td>
+                    <td>${c.final}</td>
+                    <td><strong>${c.average}</strong></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Dashboard Metriklerini Hesapla
+        function updateStats(courses) {
+            const total = courses.length;
+            const totalEcts = courses.reduce((sum, c) => sum + c.ects, 0);
+            
+            let totalWeighted = 0;
+            courses.forEach(c => {
+                totalWeighted += c.average * c.ects;
+            });
+            const avg = totalEcts > 0 ? (totalWeighted / totalEcts).toFixed(2) : '0.00';
+
+            document.getElementById('totalCourses').textContent = total;
+            document.getElementById('totalEcts').textContent = totalEcts;
+            document.getElementById('avgGrade').textContent = avg;
+        }
+
+        // Yeni Ders Ekleme Formu
+        document.getElementById('courseForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const payload = {
+                code: document.getElementById('code').value.trim(),
+                name: document.getElementById('name').value.trim(),
+                credit: parseInt(document.getElementById('credit').value),
+                ects: parseInt(document.getElementById('ects').value),
+                midterm: parseFloat(document.getElementById('midterm').value) || 0.0,
+                final: parseFloat(document.getElementById('final').value) || 0.0
+            };
+
+            const res = await fetch(API_BASE, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                document.getElementById('courseForm').reset();
+                fetchCourses();
+            } else {
+                alert("Ders eklenemedi. Kodun benzersiz olduğundan emin ol!");
+            }
+        });
+
+        // Sayfa açıldığında dersleri yükle
+        fetchCourses();
+    </script>
+</body>
+</html>
