@@ -101,6 +101,33 @@
             </div>
         </div>
 
+        <!-- Akademik Hedef Simülatörü -->
+        <div class="card" style="border: 1px solid #3b82f6;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+                <h2 style="color: #60a5fa; margin: 0;">🎯 Final Başarı Simülatörü</h2>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <label style="font-size: 0.9rem;">Hedef GANO:</label>
+                    <input type="number" id="targetGpaInput" value="3.20" step="0.05" min="1.0" max="4.0" style="width: 80px; padding: 0.4rem;">
+                    <button class="btn-primary" onclick="simulateTarget()" style="padding: 0.4rem 0.8rem;">Hesapla</button>
+                </div>
+            </div>
+            <div id="simulationResult" style="display: none; margin-top: 1rem;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ders Kodu</th>
+                            <th>Ders Adı</th>
+                            <th>Mevcut Vize</th>
+                            <th>Hedef Harf</th>
+                            <th>Gereken Min. Final</th>
+                            <th>Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody id="simTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- Ders Ekleme Formu -->
         <div class="card">
             <h2>Yeni Ders Kaydı</h2>
@@ -218,7 +245,7 @@
             const finals = courses.map(c => c.final);
             const averages = courses.map(c => c.average);
 
-            // 1. Çubuk Grafik (Vize - Final - Ortalama)
+            // 1. Bar Grafiği
             const ctxBar = document.getElementById('gradesChart').getContext('2d');
             if (barChartInstance) barChartInstance.destroy();
 
@@ -245,7 +272,7 @@
                 }
             });
 
-            // 2. Pasta / Halka Grafik (Harf Notu Dağılımı)
+            // 2. Pasta / Halka Grafiği
             const letterCounts = {};
             courses.forEach(c => {
                 letterCounts[c.letter] = (letterCounts[c.letter] || 0) + 1;
@@ -271,6 +298,44 @@
                     }
                 }
             });
+        }
+
+        async function simulateTarget() {
+            const target = parseFloat(document.getElementById('targetGpaInput').value);
+            const res = await fetch('/api/simulate-target', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ target_gpa: target })
+            });
+
+            const data = await res.json();
+            const container = document.getElementById('simulationResult');
+            const tbody = document.getElementById('simTableBody');
+
+            if (!res.ok || data.status === 'completed') {
+                alert(data.message || "Simülasyon yapılamadı.");
+                return;
+            }
+
+            tbody.innerHTML = '';
+            data.recommendations.forEach(r => {
+                const tr = document.createElement('tr');
+                const badge = r.is_possible 
+                    ? `<span class="badge badge-letter">Erişilebilir</span>` 
+                    : `<span class="badge badge-fail">Çok Zor (>100)</span>`;
+
+                tr.innerHTML = `
+                    <td><span class="badge badge-code">${r.code}</span></td>
+                    <td><strong>${r.name}</strong></td>
+                    <td>${r.midterm}</td>
+                    <td><strong>${r.target_letter}</strong> (${r.target_point})</td>
+                    <td style="font-size: 1.1rem; font-weight: 700; color: #60a5fa;">${r.needed_final}</td>
+                    <td>${badge}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            container.style.display = 'block';
         }
 
         async function deleteCourse(id) {
