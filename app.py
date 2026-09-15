@@ -1,3 +1,4 @@
+import os
 from flask import Flask, jsonify, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
@@ -7,12 +8,25 @@ CORS(app)
 
 # Veritabanı Bağlantı Ayarları
 DB_USER = 'postgres'
-DB_PASSWORD = '1336481+qW'  # PostgreSQL şifren
+DB_PASSWORD = '1336481+qw'
 DB_HOST = 'localhost'
 DB_PORT = '5432'
 DB_NAME = 'unitrack_db'
 
-app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql+psycopg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
+# Canlı sunucudaki DATABASE_URL'i kontrol eder, yoksa senin lokal bağlantını kullanır:
+database_url = os.environ.get('DATABASE_URL')
+
+if database_url:
+  # Canlıdaki Neon/Render URL'sini SQLAlchemy formatına uyarlar:
+  if database_url.startswith('postgres://'):
+    database_url = database_url.replace('postgres://', 'postgresql://', 1)
+  app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+else:
+  # Lokaldeysen senin mevcut ayarların çalışır:
+  app.config['SQLALCHEMY_DATABASE_URI'] = (
+      f'postgresql+psycopg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
+  )
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
